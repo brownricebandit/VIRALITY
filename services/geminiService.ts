@@ -1,10 +1,18 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { AnalysisResult } from "../types";
 
-export const analyzeVideo = async (base64Video: string, mimeType: string, maxLength?: number, apiKey?: string): Promise<AnalysisResult> => {
-  // Initialize inside the function to avoid top-level process.env access issues
-  // Use provided apiKey or fallback to process.env (though process.env might be empty in client-side only builds)
-  const key = apiKey || process.env.API_KEY;
+export const analyzeVideo = async (
+  base64Video: string,
+  mimeType: string,
+  maxLength?: number,
+  apiKey?: string
+): Promise<AnalysisResult> => {
+  // Prefer an explicitly provided key, then the Vite env variable, then a process.env fallback for non-Vite environments
+  const key =
+    apiKey ||
+    (typeof import.meta !== "undefined" ? import.meta.env.VITE_GEMINI_API_KEY : undefined) ||
+    // @ts-ignore - process may exist in some runtimes
+    (typeof process !== "undefined" ? process.env?.API_KEY : undefined);
   if (!key) {
     throw new Error("API Key is missing. Please provide a valid Gemini API Key.");
   }
